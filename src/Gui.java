@@ -77,6 +77,8 @@ public class Gui {
         bottom.add(next);
         bottom.add(menu);
 
+
+
         o.setVisible(true);
     }
 
