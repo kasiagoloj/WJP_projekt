@@ -2,12 +2,14 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Coal extends Source {
+    public static int how_many;
     public Coal() {
         ImageIcon image = new ImageIcon("coal.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 
         super(
+                "Elektrownia węglowa",
                 3_500_000_000L,
                 600,
                 image,

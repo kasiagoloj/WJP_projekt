@@ -8,7 +8,8 @@ public class Atom extends Source {
         image = new ImageIcon(resizedImage);
 
         super(
-                3_500_000_000L,
+                "Elektrownia atomowa",
+                150_000_000_000L,
                 600,
                 image,
                 "<html><b>Elektrownia atomowa</b> <br> Cena: 3,5 mld zł <br> Energia: 600 GWh/miesiąc</html>"

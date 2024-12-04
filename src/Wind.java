@@ -8,7 +8,8 @@ public class Wind extends Source {
         image = new ImageIcon(resizedImage);
 
         super(
-                3_500_000_000L,
+                "Farma wiatrowa",
+                80_000_000L,
                 600,
                 image,
                 "<html><b>Farma wiatrowa</b> <br> Cena: 3,5 mld zł <br> Energia: 600 GWh/miesiąc</html>"
