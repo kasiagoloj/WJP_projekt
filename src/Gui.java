@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
 
 public class Gui {
     public void start() {
@@ -30,14 +32,17 @@ public class Gui {
         JLabel energy_label = new JLabel("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
         energy_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
-        JLabel pollution_label = new JLabel("|  Zanieczyszczenie: " + Data.pollution + "%");
+        JLabel pollution_label = new JLabel("| Zanieczyszczenie: " + Data.pollution + "%");
         pollution_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
+
+        JLabel current_label = new JLabel("| Etap: " + Data.current_level);
+        current_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
         state.add(money_label);
         state.add(energy_label);
         state.add(pollution_label);
+        state.add(current_label);
 
-        // Zaktualizuj etykietę money_label z odpowiednimi jednostkami
         updateMoneyLabel(money_label);
 
         buy.setLayout(new GridLayout(8, 1));
@@ -98,6 +103,7 @@ public class Gui {
     private void next_level(){
         Data.money += 576_000*Data.energy;
         Data.pollution += 5*Coal.how_many;
+        Data.current_level ++;
     }
 
 

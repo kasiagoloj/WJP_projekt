@@ -10,9 +10,9 @@ public class Atom extends Source {
         super(
                 "Elektrownia atomowa",
                 150_000_000_000L,
-                600,
+                2000,
                 image,
-                "<html><b>Elektrownia atomowa</b> <br> Cena: 3,5 mld zł <br> Energia: 600 GWh/miesiąc</html>"
+                "<html><b>Elektrownia atomowa</b> <br> Cena: 150 mld zł <br> Energia: 2000 GWh/miesiąc</html>"
         );
     }
 }

@@ -10,9 +10,9 @@ public class Sun extends Source {
         super(
                 "Panele słoneczne",
                 60_000_000L,
-                600,
+                20,
                 image,
-                "<html><b>Panele słoneczne</b> <br> Cena: 3,5 mld zł <br> Energia: 600 GWh/miesiąc</html>"
+                "<html><b>Panele słoneczne</b> <br> Cena: 60 mln zł <br> Energia: 20 GWh/miesiąc</html>"
         );
     }
 }

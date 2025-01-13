@@ -10,9 +10,9 @@ public class Wind extends Source {
         super(
                 "Farma wiatrowa",
                 80_000_000L,
-                600,
+                40,
                 image,
-                "<html><b>Farma wiatrowa</b> <br> Cena: 3,5 mld zł <br> Energia: 600 GWh/miesiąc</html>"
+                "<html><b>Farma wiatrowa</b> <br> Cena: 80 mln zł <br> Energia: 40 GWh/miesiąc</html>"
         );
     }
 }
