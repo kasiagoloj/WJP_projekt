@@ -1,14 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.dnd.*;
-import java.awt.datatransfer.*;
 
 public class Gui {
     public void start() {
         Okno o = new Okno("SPARK");
 
         JPanel state = new JPanel();
-        state.setLayout(new FlowLayout());
+        state.setLayout(new GridLayout(2,2));
         state.setBackground(Color.BLUE);
 
         JPanel buy = new JPanel();
@@ -17,6 +15,15 @@ public class Gui {
         JPanel map = new JPanel();
         map.setBackground(Color.GREEN);
         map.setLayout(new GridLayout(5,5));
+
+        for (int i = 0; i < 25; i++) {
+            JPanel cell = new JPanel();
+            cell.setOpaque(false);
+            cell.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            cell.setLayout(new BorderLayout());
+
+            map.add(cell);
+        }
 
         JPanel bottom = new JPanel();
         bottom.setBackground(Color.GRAY);
@@ -39,8 +46,8 @@ public class Gui {
         current_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
         state.add(money_label);
-        state.add(energy_label);
         state.add(pollution_label);
+        state.add(energy_label);
         state.add(current_label);
 
         updateMoneyLabel(money_label);
@@ -57,15 +64,27 @@ public class Gui {
                     source.performAction();
                     updateMoneyLabel(money_label);
                     JLabel imageLabel = new JLabel(source.getImage());
-                    map.add(imageLabel);
+                    for (Component component : map.getComponents()) {
+                        if (component instanceof JPanel){
+                            JPanel cell = (JPanel) component;
+                            if (cell.getComponentCount() == 0) {
+                                cell.add(imageLabel);
+                                break;
+                            }
+                        }
+                    }
                 }
                 energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
                 pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
+                current_label.setText("| Etap: " + Data.current_level);
 
                 map.revalidate();
                 map.repaint();
             });
         }
+
+        Coal coalSource = new Coal();
+        coalSource.performWithoutCost(map, energy_label, pollution_label);
 
         JButton next = new JButton("Następny etap");
         next.setFont(new Font("Parkinsans", Font.BOLD, 20));
@@ -74,6 +93,10 @@ public class Gui {
             updateMoneyLabel(money_label);
             energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
             pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
+            current_label.setText("| Etap: " + Data.current_level);
+
+            map.revalidate();
+            map.repaint();
         });
 
         JButton menu = new JButton("Menu");
@@ -89,13 +112,13 @@ public class Gui {
 
     private void updateMoneyLabel(JLabel money_label) {
         if (Data.money >= 1_000_000_000) {
-            money_label.setText("Posiadasz: " + Data.money / 1_000_000_000 + " mld zł    ");
+            money_label.setText("| Posiadasz: " + Data.money / 1_000_000_000 + " mld zł ");
         } else if (Data.money >= 1_000_000) {
-            money_label.setText("Posiadasz: " + Data.money / 1_000_000 + " mln zł   ");
+            money_label.setText("| Posiadasz: " + Data.money / 1_000_000 + " mln zł ");
         } else if (Data.money >= 1_000) {
-            money_label.setText("Posiadasz: " + Data.money / 1_000 + " tys zł  ");
+            money_label.setText("| Posiadasz: " + Data.money / 1_000 + " tys zł ");
         } else {
-            money_label.setText("Posiadasz: " + Data.money + " zł   ");
+            money_label.setText("| Posiadasz: " + Data.money + " zł ");
         }
     }
 
