@@ -3,4 +3,5 @@ public class Data {
     public static long energy = 0;
     public static int pollution = 0;
     public static int current_level = 0;
+    public static int counter = 1;
 }

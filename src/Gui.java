@@ -6,6 +6,7 @@ public class Gui {
     public void start() {
         Okno o = new Okno("SPARK");
 
+        //podział na panele
         JPanel state = new JPanel();
         state.setLayout(new GridLayout(2,2));
         state.setBackground(Color.BLUE);
@@ -17,6 +18,7 @@ public class Gui {
         map.setBackground(Color.GREEN);
         map.setLayout(new GridLayout(5,5));
 
+        //tworzenie komórek na mapie
         for (int i = 0; i < 25; i++) {
             JPanel cell = new JPanel();
             cell.setOpaque(false);
@@ -34,6 +36,7 @@ public class Gui {
         o.add(map, BorderLayout.CENTER);
         o.add(bottom, BorderLayout.SOUTH);
 
+        //labele na górze
         JLabel money_label = new JLabel();
         money_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
@@ -57,12 +60,14 @@ public class Gui {
 
         Source[] sources = {new Coal(), new Wind(), new Sun(), new Atom()};
 
+        //kupowanie
         for (Source source : sources) {
             buy.add(source.getButton());
             buy.add(source.getLabel());
             source.getButton().addActionListener(e -> {
-                if (Data.money >= source.cost) {
+                if (Data.money >= source.cost && Data.counter <= 25) {
                     source.performAction();
+                    Data.counter ++;
                     updateMoneyLabel(money_label);
                     JLabel imageLabel = new JLabel(source.getImage());
                     for (Component component : map.getComponents()) {
@@ -88,6 +93,7 @@ public class Gui {
         Coal coalSource = new Coal();
         coalSource.performWithoutCost(map, energy_label, pollution_label);
 
+        //button 'następny etap'
         JButton next = new JButton("Następny etap");
         next.setFont(new Font("Parkinsans", Font.BOLD, 20));
         next.addActionListener(e -> {
@@ -111,6 +117,7 @@ public class Gui {
         o.setVisible(true);
     }
 
+    //updade labeli money i energy
     private void updateMoneyLabel(JLabel money_label) {
         if (Data.money >= 1_000_000_000) {
             money_label.setText("| Posiadasz: " + Data.money / 1_000_000_000 + " mld zł ");
@@ -127,9 +134,11 @@ public class Gui {
         energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
     }
 
+    //popup menu po najechaniu na pole i operacje
     private void addChanges(JPanel cell, Source source, JLabel imageLabel, JLabel money_label, JLabel energy_label) {
         JPopupMenu popup = new JPopupMenu();
-        JMenuItem sell = new JMenuItem("Sprzedaj");
+        JMenuItem remove = new JMenuItem("Usuń");
+
         if (source instanceof Wind && Data.money >= source.cost/2) {
             JMenuItem upgrade = new JMenuItem("Podwój wydajność");
             upgrade.addActionListener(e -> {
@@ -152,19 +161,20 @@ public class Gui {
             popup.add(upgrade);
         }
 
-        sell.addActionListener(e -> {
+        remove.addActionListener(e -> {
             cell.remove(imageLabel);
-            Data.money += (source.cost/2);
+            Data.money -= (source.cost/2);
             Data.energy -= source.energyGenerated;
             updateMoneyLabel(money_label);
             updateEnergyLabel(energy_label);
+            Data.counter--;
 
             cell.revalidate();
             cell.repaint();
 
         });
 
-        popup.add(sell);
+        popup.add(remove);
 
         cell.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -184,6 +194,7 @@ public class Gui {
     }
 
 
+    //button 'next level'
     private void next_level(){
         Data.money += 576_000*Data.energy;
         Data.pollution += 5*Coal.how_many;
