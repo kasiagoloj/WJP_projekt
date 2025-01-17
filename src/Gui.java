@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 
 public class Gui {
     public void start() {
@@ -69,6 +70,7 @@ public class Gui {
                             JPanel cell = (JPanel) component;
                             if (cell.getComponentCount() == 0) {
                                 cell.add(imageLabel);
+                                addChanges(cell, source, imageLabel, money_label, energy_label);
                                 break;
                             }
                         }
@@ -91,7 +93,6 @@ public class Gui {
         next.addActionListener(e -> {
             next_level();
             updateMoneyLabel(money_label);
-            energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
             pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
             current_label.setText("| Etap: " + Data.current_level);
 
@@ -120,6 +121,66 @@ public class Gui {
         } else {
             money_label.setText("| Posiadasz: " + Data.money + " zł ");
         }
+    }
+
+    private void updateEnergyLabel(JLabel energy_label) {
+        energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
+    }
+
+    private void addChanges(JPanel cell, Source source, JLabel imageLabel, JLabel money_label, JLabel energy_label) {
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem sell = new JMenuItem("Sprzedaj");
+        if (source instanceof Wind && Data.money >= source.cost/2) {
+            JMenuItem upgrade = new JMenuItem("Podwój wydajność");
+            upgrade.addActionListener(e -> {
+                Data.money -= source.cost/2;
+                Data.energy += 40;
+                updateMoneyLabel(money_label);
+                updateEnergyLabel(energy_label);
+            });
+            popup.add(upgrade);
+        }
+        else if (source instanceof Sun && Data.money >= source.cost/3) {
+            JMenuItem upgrade = new JMenuItem("Podwój wydajność");
+            upgrade.addActionListener(e -> {
+                Data.money -= source.cost/3;
+                Data.energy += 20;
+                updateMoneyLabel(money_label);
+                updateEnergyLabel(energy_label);
+
+            });
+            popup.add(upgrade);
+        }
+
+        sell.addActionListener(e -> {
+            cell.remove(imageLabel);
+            Data.money += (source.cost/2);
+            Data.energy -= source.energyGenerated;
+            updateMoneyLabel(money_label);
+            updateEnergyLabel(energy_label);
+
+            cell.revalidate();
+            cell.repaint();
+
+        });
+
+        popup.add(sell);
+
+        cell.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                popup.show(imageLabel, imageLabel.getWidth()/2, imageLabel.getHeight()/2);
+            }
+        });
+
+        popup.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                popup.setVisible(false);
+            }
+        });
+
+
     }
 
 
