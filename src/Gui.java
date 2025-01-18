@@ -1,21 +1,24 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Gui {
+    private JPanel map;
+
     public void start() {
         Okno o = new Okno("SPARK");
 
         //podział na panele
         JPanel state = new JPanel();
         state.setLayout(new GridLayout(2,2));
-        state.setBackground(Color.BLUE);
+        state.setBackground(new Color(37,113,160));
 
         JPanel buy = new JPanel();
-        buy.setBackground(Color.RED);
+        buy.setBackground(new Color(37,113,160));
 
-        JPanel map = new JPanel();
-        map.setBackground(Color.GREEN);
+        map = new JPanel();
+        map.setBackground(new Color(57,170,215));
         map.setLayout(new GridLayout(5,5));
 
         //tworzenie komórek na mapie
@@ -62,8 +65,27 @@ public class Gui {
 
         //kupowanie
         for (Source source : sources) {
-            buy.add(source.getButton());
-            buy.add(source.getLabel());
+            JButton button = source.getButton();
+            JLabel label = source.getLabel();
+
+            button.setBackground(new Color(57,133,180));
+            button.setOpaque(true);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    button.setBackground(new Color(77,153,200));
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    button.setBackground(new Color(57,133,180));
+                }
+            });
+
+            buy.add(button);
+            buy.add(label);
             source.getButton().addActionListener(e -> {
                 if (Data.money >= source.cost && Data.counter <= 25) {
                     source.performAction();
@@ -80,6 +102,12 @@ public class Gui {
                             }
                         }
                     }
+                }
+                else if (Data.counter == 25){
+                    JOptionPane.showMessageDialog(null,"Brakuje miejsca, aby zakupić: " +source.button.getName());
+                }
+                else{
+                    JOptionPane.showMessageDialog(null,"Nie masz wystarczających środków, aby zakupić: " +source.button.getName());
                 }
                 energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
                 pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
@@ -108,6 +136,10 @@ public class Gui {
 
         JButton menu = new JButton("Menu");
         menu.setFont(new Font("Parkinsans", Font.BOLD, 20));
+        menu.addActionListener(e -> {
+            Menu m = new Menu();
+            m.wyswietl_v2();
+        });
 
         bottom.add(next);
         bottom.add(menu);
@@ -136,50 +168,63 @@ public class Gui {
 
     //popup menu po najechaniu na pole i operacje
     private void addChanges(JPanel cell, Source source, JLabel imageLabel, JLabel money_label, JLabel energy_label) {
+
+        int cellIndex = map.getComponentZOrder(cell);
+
         JPopupMenu popup = new JPopupMenu();
         JMenuItem remove = new JMenuItem("Usuń");
 
-        if (source instanceof Wind && Data.money >= source.cost/2) {
+        if ((source instanceof Sun || source instanceof Wind) && !Data.isUpgraded.getOrDefault(cellIndex, false)) {
             JMenuItem upgrade = new JMenuItem("Podwój wydajność");
             upgrade.addActionListener(e -> {
-                Data.money -= source.cost/2;
-                Data.energy += 40;
-                updateMoneyLabel(money_label);
-                updateEnergyLabel(energy_label);
-            });
-            popup.add(upgrade);
-        }
-        else if (source instanceof Sun && Data.money >= source.cost/3) {
-            JMenuItem upgrade = new JMenuItem("Podwój wydajność");
-            upgrade.addActionListener(e -> {
-                Data.money -= source.cost/3;
-                Data.energy += 20;
-                updateMoneyLabel(money_label);
-                updateEnergyLabel(energy_label);
+                if (Data.money >= source.cost / 3){
+                    Data.money -= source.cost / 3;
+                    Data.energy += 20;
+                    updateMoneyLabel(money_label);
+                    updateEnergyLabel(energy_label);
+                    Data.isUpgraded.put(cellIndex, true);
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby ulepszyć: " + source.button.getName());
 
+                }
             });
             popup.add(upgrade);
         }
+
 
         remove.addActionListener(e -> {
-            cell.remove(imageLabel);
-            Data.money -= (source.cost/2);
-            Data.energy -= source.energyGenerated;
-            updateMoneyLabel(money_label);
-            updateEnergyLabel(energy_label);
-            Data.counter--;
+            if(Data.money >= source.cost/2) {
+                cell.remove(imageLabel);
+                Data.money -= (source.cost/2);
+                Data.energy -= source.energyGenerated;
+                updateMoneyLabel(money_label);
+                updateEnergyLabel(energy_label);
+                Data.counter--;
+                Data.isUpgraded.put(cellIndex, false);
 
-            cell.revalidate();
-            cell.repaint();
+                cell.revalidate();
+                cell.repaint();
+            }
+            else{
+                JOptionPane.showMessageDialog(null,"Brakuje środków, aby usunąć: " +source.button.getName());
 
+            }
         });
 
         popup.add(remove);
 
-        cell.addMouseListener(new java.awt.event.MouseAdapter() {
+        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 popup.show(imageLabel, imageLabel.getWidth()/2, imageLabel.getHeight()/2);
+            }
+        });
+
+        cell.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                popup.setVisible(false);
             }
         });
 
@@ -192,6 +237,8 @@ public class Gui {
 
 
     }
+
+
 
 
     //button 'next level'
