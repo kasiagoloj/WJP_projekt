@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,5 +8,8 @@ public class Data {
     public static int pollution = 0;
     public static int current_level = 0;
     public static int counter = 1;
-    public static Map<Integer, Boolean> isUpgraded = new HashMap<>();
+//    public static boolean[] isUpgraded = new boolean[25];
+//    static {
+//        Arrays.fill(isUpgraded, false);
+//}
 }
