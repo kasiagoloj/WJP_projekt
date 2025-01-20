@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -35,6 +38,57 @@ public class Gui {
             cell.setLayout(new BorderLayout());
 
             cell.putClientProperty("isUpgraded", false);
+
+            new DropTarget(cell,DnDConstants.ACTION_MOVE,new DropTargetListener(){
+                @Override
+                public void dragEnter(DropTargetDragEvent dtde) {
+                    if(dtde.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)){
+                        dtde.acceptDrag(DnDConstants.ACTION_MOVE);
+                    } else{
+                        dtde.rejectDrag();
+                    }
+                }
+
+                @Override
+                public void dragOver(DropTargetDragEvent dtde) {}
+
+                @Override
+                public void dropActionChanged(DropTargetDragEvent dtde) {
+                    if (dtde.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)) {
+                        dtde.acceptDrag(DnDConstants.ACTION_MOVE);
+                    } else {
+                        dtde.rejectDrag();
+                    }
+                }
+
+                @Override
+                public void dragExit(DropTargetEvent dte) {}
+
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    try {
+                        dtde.acceptDrop(DnDConstants.ACTION_MOVE);
+
+                        Transferable transferable = dtde.getTransferable();
+                        if (transferable.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)) {
+                            Icon icon = (Icon) transferable.getTransferData(TransferableIcon.ICON_FLAVOR);
+
+                            if (cell.getComponentCount() == 0) {
+                                JLabel label = new JLabel(icon);
+                                cell.add(label);
+
+                                addChanges(cell, null, label, money_label, energy_label);
+                                map.revalidate();
+                                map.repaint();
+                            } else {
+                                JOptionPane.showMessageDialog(null, "To pole jest już zajęte");
+                            }
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
 
             map.add(cell);
         }
@@ -95,6 +149,12 @@ public class Gui {
             button.setBorderPainted(false);
             button.setFocusPainted(false);
 
+            DragSource ds = DragSource.getDefaultDragSource();
+            ds.createDefaultDragGestureRecognizer(button,DnDConstants.ACTION_MOVE, event ->{
+                Transferable transferable = new TransferableIcon(source.getImage());
+                DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
+            });
+
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -114,6 +174,13 @@ public class Gui {
                     Data.counter ++;
                     updateMoneyLabel(money_label);
                     JLabel imageLabel = new JLabel(source.getImage());
+
+                    DragSource ds2 = DragSource.getDefaultDragSource();
+                    ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
+                        Transferable transferable = new TransferableIcon(imageLabel.getIcon());
+                        DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
+                    });
+
                     for (Component component : map.getComponents()) {
                         if (component instanceof JPanel){
                             JPanel cell = (JPanel) component;
@@ -140,8 +207,8 @@ public class Gui {
             });
         }
 
-        Coal coalSource = new Coal();
-        coalSource.performWithoutCost(map, energy_label, pollution_label);
+        Coal coalBegin = new Coal();
+        coalBegin.performWithoutCost(map, energy_label, pollution_label);
 
         //button 'następny etap'
         JButton next = new JButton("Następny etap");

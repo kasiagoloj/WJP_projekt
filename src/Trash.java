@@ -4,7 +4,7 @@ import java.awt.*;
 public class Trash extends Source {
 
     public Trash() {
-        ImageIcon image = new ImageIcon("geothermal.png");
+        ImageIcon image = new ImageIcon("trash.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 
