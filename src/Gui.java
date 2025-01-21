@@ -20,15 +20,15 @@ public class Gui {
 
         //podział na panele
         state = new JPanel();
-        state.setLayout(new GridLayout(2,2));
-        state.setBackground(new Color(37,113,160));
+        state.setLayout(new GridLayout(2, 2));
+        state.setBackground(new Color(37, 113, 160));
 
         JPanel buy = new JPanel();
-        buy.setBackground(new Color(37,113,160));
+        buy.setBackground(new Color(37, 113, 160));
 
         map = new JPanel();
-        map.setBackground(new Color(57,170,215));
-        map.setLayout(new GridLayout(5,5));
+        map.setBackground(new Color(57, 170, 215));
+        map.setLayout(new GridLayout(5, 5));
 
         //tworzenie komórek na mapie
         for (int i = 0; i < 25; i++) {
@@ -39,18 +39,19 @@ public class Gui {
 
             cell.putClientProperty("isUpgraded", false);
 
-            new DropTarget(cell,DnDConstants.ACTION_MOVE,new DropTargetListener(){
+            new DropTarget(cell, DnDConstants.ACTION_MOVE, new DropTargetListener() {
                 @Override
                 public void dragEnter(DropTargetDragEvent dtde) {
-                    if(dtde.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)){
+                    if (dtde.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)) {
                         dtde.acceptDrag(DnDConstants.ACTION_MOVE);
-                    } else{
+                    } else {
                         dtde.rejectDrag();
                     }
                 }
 
                 @Override
-                public void dragOver(DropTargetDragEvent dtde) {}
+                public void dragOver(DropTargetDragEvent dtde) {
+                }
 
                 @Override
                 public void dropActionChanged(DropTargetDragEvent dtde) {
@@ -62,32 +63,68 @@ public class Gui {
                 }
 
                 @Override
-                public void dragExit(DropTargetEvent dte) {}
+                public void dragExit(DropTargetEvent dte) {
+                }
 
                 @Override
                 public void drop(DropTargetDropEvent dtde) {
+                    System.out.println("Drop is ok");
                     try {
                         dtde.acceptDrop(DnDConstants.ACTION_MOVE);
-
                         Transferable transferable = dtde.getTransferable();
+
                         if (transferable.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)) {
+                            System.out.println("first if?");
                             Icon icon = (Icon) transferable.getTransferData(TransferableIcon.ICON_FLAVOR);
+                            Source source = (Source) transferable.getTransferData(TransferableIcon.SOURCE_FLAVOR);
 
-                            if (cell.getComponentCount() == 0) {
-                                JLabel label = new JLabel(icon);
-                                cell.add(label);
+                            if (icon != null && source != null) {
+                                System.out.println("Icon and Source are valid.");
+                                if (Data.money >= source.cost && Data.counter <= 25) {
+                                    System.out.println("next if");
+                                    source.performAction();
+                                    Data.counter++;
+                                    Data.money -= source.cost;
+                                    Data.energy += source.energyGenerated;
+                                    updateMoneyLabel(money_label);
+                                    updateEnergyLabel(energy_label);
 
-                                addChanges(cell, null, label, money_label, energy_label);
+                                    JLabel imageLabel = new JLabel(icon);
+                                    System.out.println("Icon added to cell.");
+
+                                    DragSource ds2 = DragSource.getDefaultDragSource();
+                                    ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
+                                        Transferable transferableIcon = new TransferableIcon(imageLabel.getIcon(), source);
+                                        DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferableIcon, null);
+                                    });
+
+                                    JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
+                                    if (targetCell.getComponentCount() == 0) {
+                                        targetCell.add(imageLabel);
+                                        addChanges(targetCell, source, imageLabel, money_label, energy_label);
+                                        targetCell.revalidate();
+                                        targetCell.repaint();
+                                    }
+                                } else if (Data.counter == 25) {
+                                    JOptionPane.showMessageDialog(null, "Brakuje miejsca, aby dodać: " + source.button.getName());
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby zakupić: " + source.button.getName());
+                                }
+                                pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
                                 map.revalidate();
                                 map.repaint();
                             } else {
-                                JOptionPane.showMessageDialog(null, "To pole jest już zajęte");
+                                System.out.println("Icon or Source is null");
                             }
+                        } else {
+                            System.out.println("ICON_FLAVOR not supported");
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
+                        System.out.println("błąd w drop");
                     }
                 }
+
             });
 
             map.add(cell);
@@ -126,17 +163,14 @@ public class Gui {
 
         Source[] sources;
 
-        if(Data.current_level<=6) {
-            sources = new Source[] {new Coal(), new Wind(), new Sun(), new Atom()};
-        }
-        else if(Data.current_level<=8) {
-            sources = new Source[] {new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal()};
-        }
-        else if (Data.current_level<=10) {
-            sources = new Source[] {new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash()};
-        }
-        else {
-            sources = new Source[] {new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water()};
+        if (Data.current_level <= 6) {
+            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom()};
+        } else if (Data.current_level <= 8) {
+            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal()};
+        } else if (Data.current_level <= 10) {
+            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash()};
+        } else {
+            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water()};
         }
 
         //kupowanie
@@ -144,66 +178,33 @@ public class Gui {
             JButton button = source.getButton();
             JLabel label = source.getLabel();
 
-            button.setBackground(new Color(57,133,180));
+            button.setBackground(new Color(57, 133, 180));
             button.setOpaque(true);
             button.setBorderPainted(false);
             button.setFocusPainted(false);
 
             DragSource ds = DragSource.getDefaultDragSource();
-            ds.createDefaultDragGestureRecognizer(button,DnDConstants.ACTION_MOVE, event ->{
-                Transferable transferable = new TransferableIcon(source.getImage());
+            ds.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE, event -> {
+                Transferable transferable = new TransferableIcon(source.getImage(), source);
                 DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
             });
 
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
-                    button.setBackground(new Color(77,153,200));
+                    button.setBackground(new Color(77, 153, 200));
                 }
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
-                    button.setBackground(new Color(57,133,180));
+                    button.setBackground(new Color(57, 133, 180));
                 }
             });
 
             buy.add(button);
             buy.add(label);
             source.getButton().addActionListener(e -> {
-                if (Data.money >= source.cost && Data.counter <= 25) {
-                    source.performAction();
-                    Data.counter ++;
-                    updateMoneyLabel(money_label);
-                    JLabel imageLabel = new JLabel(source.getImage());
 
-                    DragSource ds2 = DragSource.getDefaultDragSource();
-                    ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
-                        Transferable transferable = new TransferableIcon(imageLabel.getIcon());
-                        DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
-                    });
-
-                    for (Component component : map.getComponents()) {
-                        if (component instanceof JPanel){
-                            JPanel cell = (JPanel) component;
-                            if (cell.getComponentCount() == 0) {
-                                cell.add(imageLabel);
-                                addChanges(cell, source, imageLabel, money_label, energy_label);
-                                break;
-                            }
-                        }
-                    }
-                }
-                else if (Data.counter == 25){
-                    JOptionPane.showMessageDialog(null,"Brakuje miejsca, aby dodać: " +source.button.getName());
-                }
-                else{
-                    JOptionPane.showMessageDialog(null,"Nie masz wystarczających środków, aby zakupić: " +source.button.getName());
-                }
-                energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
-                pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
-                current_label.setText("| Etap: " + Data.current_level);
-
-                map.revalidate();
-                map.repaint();
             });
         }
 
@@ -234,10 +235,8 @@ public class Gui {
         bottom.add(menu);
 
 
-
         o.setVisible(true);
     }//koniec start()
-
 
 
     //updade labeli money i energy
@@ -272,10 +271,10 @@ public class Gui {
         if ((source instanceof Sun || source instanceof Wind)) {
             boolean isUpgraded = Boolean.TRUE.equals(cell.getClientProperty("isUpgraded"));
             //jeśli jeszcze nie zostało ulepszone
-            if(!isUpgraded){
+            if (!isUpgraded) {
                 JMenuItem upgrade = new JMenuItem("Podwój wydajność");
                 upgrade.addActionListener(e -> {
-                    if (Data.money >= source.cost / 3){
+                    if (Data.money >= source.cost / 3) {
                         Data.money -= source.cost / 3;
                         Data.energy += 20;
                         updateMoneyLabel(money_label);
@@ -286,17 +285,17 @@ public class Gui {
                         popup.remove(upgrade);
                     } else {
                         JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby ulepszyć: " + source.button.getName());
-                 }
-             });
-            popup.add(upgrade);
-        }
+                    }
+                });
+                popup.add(upgrade);
+            }
         }
 
 
         remove.addActionListener(e -> {
-            if(Data.money >= source.cost/2) {
+            if (Data.money >= source.cost / 2) {
                 cell.remove(imageLabel);
-                Data.money -= (source.cost/2);
+                Data.money -= (source.cost / 2);
                 Data.energy -= source.energyGenerated;
                 updateMoneyLabel(money_label);
                 updateEnergyLabel(energy_label);
@@ -306,9 +305,8 @@ public class Gui {
 
                 cell.revalidate();
                 cell.repaint();
-            }
-            else{
-                JOptionPane.showMessageDialog(null,"Brakuje środków, aby usunąć: " +source.button.getName());
+            } else {
+                JOptionPane.showMessageDialog(null, "Brakuje środków, aby usunąć: " + source.button.getName());
 
             }
         });
@@ -318,7 +316,7 @@ public class Gui {
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                popup.show(imageLabel, imageLabel.getWidth()/2, imageLabel.getHeight()/2);
+                popup.show(imageLabel, imageLabel.getWidth() / 2, imageLabel.getHeight() / 2);
             }
         });
 
@@ -340,11 +338,11 @@ public class Gui {
     }
 
     //button 'next level'
-    private void next_level(){
-        Data.money += 576_000*Data.energy;
-        Data.pollution += 5*Coal.how_many;
-        Data.current_level ++;
-        if(Data.current_level %5 == 0){
+    private void next_level() {
+        Data.money += 576_000 * Data.energy;
+        Data.pollution += 5 * Coal.how_many;
+        Data.current_level++;
+        if (Data.current_level % 5 == 0) {
             JButton fix = new JButton("Napraw atmosferę");
             fix.setFont(new Font("Parkinsans", Font.BOLD, 20));
             fix.addActionListener(e -> {
@@ -357,16 +355,15 @@ public class Gui {
         }
     }
 
-    private void fix_void(){
-        if(Data.money >= 500_000_000){
+    private void fix_void() {
+        if (Data.money >= 500_000_000) {
             Data.money -= 500_000_000;
             Data.pollution -= 5;
             updateMoneyLabel(money_label);
             updatePollutionLabel(pollution_label);
             state.revalidate();
             state.repaint();
-        }
-        else{
+        } else {
             JOptionPane.showMessageDialog(null, "Brak wystarczających środków.");
         }
 
