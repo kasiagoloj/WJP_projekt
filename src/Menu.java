@@ -6,12 +6,13 @@ import java.awt.event.MouseEvent;
 
 public class Menu {
 
+    //zmienne do obu metod
     static boolean read = false;
     static int page = 0;
     JLabel instructionsText;
     JPanel instructions;
 
-    public void wyswietl_v1() {
+    public void wyswietlV1() {
         MenuFrame m = new MenuFrame("Menu");
         m.setLayout(new BorderLayout());
 
@@ -33,6 +34,7 @@ public class Menu {
 
         instructions.setLayout(new BorderLayout());
 
+        //tekst w menu
         instructionsText = new JLabel();
         instructionsText.setFont(new Font("Parkinsans", Font.BOLD, 20));
         instructionsText.setOpaque(false);
@@ -44,6 +46,7 @@ public class Menu {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttons.setBackground(new Color(200, 220, 200));
 
+        //przycisk do przewijania stron
         JButton dalej = new JButton("Dalej");
         dalej.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -58,6 +61,7 @@ public class Menu {
             }
         });
 
+        //przejście do gry
         JButton close = new JButton("Zamknij menu");
         close.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -76,7 +80,8 @@ public class Menu {
         m.setVisible(true);
     }
 
-    public void wyswietl_v2() {
+    //menu wyswietlane w trakcje gry
+    public void wyswietlV2() {
         MenuFrame m2 = new MenuFrame("Menu");
         m2.setLayout(new BorderLayout());
 
@@ -103,6 +108,7 @@ public class Menu {
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1));
         buttonPanel.setBackground(new Color(200, 220, 200));
 
+        //przyciski do przechodzenia między stronami menu
         JButton page1 = new JButton("Panel zakupów");
         JButton page2 = new JButton("Mapa");
         JButton page3 = new JButton("Następny etap");
@@ -156,6 +162,7 @@ public class Menu {
         m2.setVisible(true);
     }
 
+    //tekst w zależności od strony
     private void updateInstructionsText() {
         switch (page) {
             case 0:
@@ -179,7 +186,7 @@ public class Menu {
     }
 
     public static void main(String[] args) {
-        new Menu().wyswietl_v2();
+        new Menu().wyswietlV2();
     }
 }
 
