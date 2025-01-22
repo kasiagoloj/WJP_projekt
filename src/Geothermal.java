@@ -1,8 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Geothermal dziedzicząca po Source
+ */
 public class Geothermal extends Source {
 
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Geothermal() {
         ImageIcon image = new ImageIcon("geothermal.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

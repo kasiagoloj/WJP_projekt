@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 
+/** klasa Mountain dziedzicząca po Source */
 public class Mountain extends Source {
+
+    /** główna metoda wywoływana przy dodaniu obiektu */
     public Mountain() {
         ImageIcon image = new ImageIcon("mountain.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

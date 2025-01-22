@@ -1,7 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Sun dziedzicząca po Source
+ */
 public class Sun extends Source {
+
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Sun() {
         ImageIcon image = new ImageIcon("sun.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

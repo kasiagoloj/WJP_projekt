@@ -1,8 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Sun dziedzicząca po Source
+ */
 public class Water extends Source {
 
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Water() {
         ImageIcon image = new ImageIcon("water.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

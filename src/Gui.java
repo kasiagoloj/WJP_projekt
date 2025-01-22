@@ -7,20 +7,28 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class Gui {
+    /**
+     * ogólne panele w oknie
+     */
     private JPanel map;
     private JPanel bottom;
     private JPanel state;
     private JPanel buy;
-
+    /**
+     * Labele w panelu state
+     */
     private JLabel money_label;
     private JLabel energy_label;
     private JLabel pollution_label;
     private JLabel points_label;
 
+    /**
+     * metoda odpowiedzialna za tworzenie interfejsu i ogólne działanie
+     */
     public void start() {
         Okno o = new Okno("SPARK");
 
-        //podział na panele
+        /** inicjalizacja i ustawienia paneli*/
         state = new JPanel();
         state.setLayout(new GridLayout(2, 3));
         state.setBackground(new Color(37, 113, 160));
@@ -37,7 +45,7 @@ public class Gui {
         bottom.setBackground(Color.GRAY);
         bottom.setLayout(new FlowLayout());
 
-        //labele na górze
+        /** inicjalizacja etykiet */
         money_label = new JLabel();
         money_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
@@ -53,19 +61,20 @@ public class Gui {
         JLabel current_label = new JLabel("| Etap: " + Data.current_level);
         current_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
+        /**dodawanie etykiet do panelu state */
         state.add(money_label);
         state.add(pollution_label);
         state.add(points_label);
         state.add(energy_label);
         state.add(current_label);
 
-        //dodanie głównych paneli do okna
+        /** dodawanie paneli do okna*/
         o.add(state, BorderLayout.NORTH);
         o.add(buy, BorderLayout.WEST);
         o.add(map, BorderLayout.CENTER);
         o.add(bottom, BorderLayout.SOUTH);
 
-        //tworzenie komórek na mapie
+        /** tworzenie komórek mapy*/
         for (int i = 0; i < 25; i++) {
             JPanel cell = new JPanel();
             cell.setOpaque(false);
@@ -74,6 +83,7 @@ public class Gui {
 
             cell.putClientProperty("isUpgraded", false);
 
+            /** obsługa przeciągania i upuszczania elementów*/
             new DropTarget(cell, DnDConstants.ACTION_MOVE, new DropTargetListener() {
                 @Override
                 public void dragEnter(DropTargetDragEvent dtde) {
@@ -101,7 +111,7 @@ public class Gui {
                 public void dragExit(DropTargetEvent dte) {
                 }
 
-                //co się dzieje po upuszczeniu, warunki itd.
+                /** sprawdzanie warunków, czy element może być umieszczony w danym miejscu i wykonywanie akcji drop*/
                 @Override
                 public void drop(DropTargetDropEvent dtde) {
                     try {
@@ -116,11 +126,9 @@ public class Gui {
                                 JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
                                 boolean isSpecial = source instanceof Lake || source instanceof Mountain || source instanceof Forest;
 
-                                //czy to elektrownia wodna i obok jest jezioro
                                 if (source instanceof Water && !hasAdjacentLake(targetCell)) {
                                     JOptionPane.showMessageDialog(null, "Elektrownia wodna musi być umieszczona obok jeziora");
                                 } else {
-                                    //czy wystarczy środków, points lub money
                                     if ((isSpecial && Data.points >= source.cost) || (!isSpecial && Data.money >= source.cost && Data.counter < 25)) {
                                         source.performAction();
                                         if (isSpecial) {
@@ -132,7 +140,6 @@ public class Gui {
                                         }
                                         JLabel imageLabel = new JLabel(icon);
 
-                                        //dodawanie jako punktu do upuszczenia
                                         DragSource ds2 = DragSource.getDefaultDragSource();
                                         ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
                                             Transferable transferableIcon = new TransferableIcon(imageLabel.getIcon(), source);
@@ -145,7 +152,6 @@ public class Gui {
                                             targetCell.revalidate();
                                             targetCell.repaint();
                                         }
-                                        //czy jest jeszcze miejsce
                                     } else if (Data.counter == 25) {
                                         JOptionPane.showMessageDialog(null, "Brakuje miejsca, aby dodać: " + source.button.getName());
                                     } else {
@@ -163,20 +169,19 @@ public class Gui {
                         ex.printStackTrace();
                     }
                 }
-
             });
             map.add(cell);
         }
+        /** aktualizacja etykiet i zainicjowanie dostęppnych źródeł*/
         updateMoneyLabel(money_label);
-        //źródła i dodanie ich do panelu buy
         Source[] sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water(), new Lake(), new Mountain(), new Forest()};
         addingSources(buy, sources);
 
-        //element jako stan początkowy, niemożliwy do usunięcia
+        /** dodanie źródła jako początkowy stan gry */
         Coal coalBegin = new Coal();
         coalBegin.performWithoutCost(map, energy_label, pollution_label);
 
-        //button 'następny etap'
+        /** utworzenie przycisku przejścia do kolejnego etapu i jego funkcjonalności oraz dodanie go do panelu */
         JButton next = new JButton("Następny etap");
         next.setFont(new Font("Parkinsans", Font.BOLD, 20));
         next.addActionListener(e -> {
@@ -189,24 +194,25 @@ public class Gui {
             map.revalidate();
             map.repaint();
         });
+        bottom.add(next);
 
-        //przycisk menu_v2
+
+        /** dutworzenie i dodanie przycisku menu */
         JButton menu = new JButton("Menu");
         menu.setFont(new Font("Parkinsans", Font.BOLD, 20));
         menu.addActionListener(e -> {
             Menu m = new Menu();
             m.wyswietlV2();
         });
-
-        bottom.add(next);
         bottom.add(menu);
 
-
         o.setVisible(true);
-    }//koniec start(), dalej są metody
+    }
 
+    /**
+     * metoda aktualizująca etykietę z ilością pieniędzy
+     */
 
-    //updade labeli money i energy
     private void updateMoneyLabel(JLabel money_label) {
         if (Data.money >= 1_000_000_000) {
             money_label.setText("| Posiadasz: " + Data.money / 1_000_000_000 + " mld zł ");
@@ -219,19 +225,32 @@ public class Gui {
         }
     }
 
+    /**
+     * metoda aktualizująca etykietę z ilością generowanej energii
+     */
+
     private void updateEnergyLabel(JLabel energy_label) {
         energy_label.setText("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
     }
+
+    /**
+     * metoda aktualizująca etykietę ze wskaźnikiem zanieczyszczeń
+     */
 
     private void updatePollutionLabel(JLabel pollution_label) {
         pollution_label.setText("| Zanieczyszczenie: " + Data.pollution + "%");
     }
 
+    /**
+     * metoda aktualizująca etykietę z ilością punktów
+     */
     private void updatePointsLabel(JLabel energy_label) {
         points_label.setText("| Punkty: " + Data.points);
     }
 
-    //czy w pobliżu jest jezioro
+    /**
+     * metoda sprawdzająca czy w otoczeniu jest jezioro
+     */
     private boolean hasAdjacentLake(JPanel targetCell) {
         int cellIndex = map.getComponentZOrder(targetCell);
         int gridSize = 5;
@@ -260,7 +279,9 @@ public class Gui {
         return false;
     }
 
-    //czy w pobliżu jest góra
+    /**
+     * metoda sprawdzająca czy w otoczeniu jest góra
+     */
     private boolean hasAdjacentMountain(JPanel targetCell) {
         int cellIndex = map.getComponentZOrder(targetCell);
         int gridSize = 5;
@@ -290,7 +311,9 @@ public class Gui {
         return false;
     }
 
-    //czy w pobliżu jest farma wiatrowa
+    /**
+     * metoda sprawdzająca czy w otoczeniu jest farma wiatrowa i aktualizująca ją
+     */
     private void checkAndUpgradeAdjacentWindFarms(JPanel mountainCell, JLabel energy_label) {
         int cellIndex = map.getComponentZOrder(mountainCell);
         int gridSize = 5;
@@ -326,14 +349,15 @@ public class Gui {
         }
     }
 
-
-    //popup menu po najechaniu na pole i operacje
+    /**
+     * metoda tworząca popup menu po najechaniu na elementy na mapie i
+     * dodająca do nich opcję usunięcia i, w zależności od źródła, ulepszenie
+     */
     private void addChanges(JPanel cell, Source source, JLabel imageLabel, JLabel money_label, JLabel energy_label) {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem remove = new JMenuItem("Usuń");
         boolean isUpgraded = Boolean.TRUE.equals(cell.getClientProperty("isUpgraded"));
 
-        //ulepszanie farmy wiatrowej
         if (source instanceof Wind) {
             if (hasAdjacentMountain(cell)) {
                 int energyBoost = source.energyGenerated;
@@ -359,7 +383,6 @@ public class Gui {
             }
         }
 
-        //ulepszanie paneli
         if (source instanceof Sun && !isUpgraded) {
             JMenuItem upgrade = new JMenuItem("Podwój wydajność");
             upgrade.addActionListener(e -> {
@@ -369,7 +392,6 @@ public class Gui {
                     updateMoneyLabel(money_label);
                     updateEnergyLabel(energy_label);
 
-                    //oznaczenie jako ulepszona
                     cell.putClientProperty("isUpgraded", true);
                     popup.remove(upgrade);
                 } else {
@@ -423,13 +445,14 @@ public class Gui {
         });
     }
 
-    //button 'next level'
+    /**
+     * metoda wywoływana po kliknięciu przycisku przejścia do kolejnego poziomu
+     */
     private void nextLevel() {
         Data.money += 576_000 * Data.energy;
         Data.pollution = Math.max(0, Data.pollution + 5 * Coal.how_many - 3 * Trash.how_many - Forest.how_many);
         Data.current_level++;
         Data.points++;
-        //czy przegrana
         if (Data.pollution >= 100) {
             JOptionPane.showMessageDialog(null, "Zanieczyszczenie przekroczyło 100 %. Przegrałeś");
             Window[] windows = Window.getWindows();
@@ -438,8 +461,7 @@ public class Gui {
             }
             return;
         }
-        //czy wygrana
-        if (Data.energy>=10000) {
+        if (Data.energy >= 10000) {
             JOptionPane.showMessageDialog(null, "Wygrałeś! Jednak jeśli chcesz, możesz kontynuować grę.");
         }
         for (Component component : bottom.getComponents()) {
@@ -449,7 +471,6 @@ public class Gui {
                 bottom.repaint();
             }
         }
-        //Przycisk do naprawiania atmosfery
         if (Data.current_level % 5 == 0) {
             JButton fix = new JButton("Napraw atmosferę (Koszt = 500 mln)");
             fix.setFont(new Font("Parkinsans", Font.BOLD, 20));
@@ -466,7 +487,9 @@ public class Gui {
         addingSources(buy, new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water(), new Lake(), new Mountain(), new Forest()});
     }
 
-    //funkcja do usuwania zanieczyszczeń
+    /**
+     * metoda wywoływana po kliknięciu przycisku naprawiania atmosfery
+     */
     private void fixVoid() {
         if (Data.money >= 500_000_000) {
             Data.money -= 500_000_000;
@@ -480,7 +503,9 @@ public class Gui {
         }
     }
 
-    //dodawanie elementów do panelu buy
+    /**
+     * metoda dodawania wszystkich elementów do panelu buy
+     */
     private void addingSources(JPanel buy, Source[] sources) {
         buy.removeAll();
         for (Source source : sources) {
@@ -528,6 +553,9 @@ public class Gui {
         }
     }
 
+    /**
+     * klasa wykorzystana do utworzenia okna
+     */
     class Okno extends JFrame {
         Okno(String nazwa) {
             super(nazwa);

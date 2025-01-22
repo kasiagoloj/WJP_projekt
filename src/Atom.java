@@ -1,7 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Atom dziedzicząca po Source
+ */
 public class Atom extends Source {
+
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Atom() {
         ImageIcon image = new ImageIcon("atom.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

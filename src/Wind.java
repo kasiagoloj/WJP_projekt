@@ -1,7 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Sun dziedzicząca po Source
+ */
 public class Wind extends Source {
+
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Wind() {
         ImageIcon image = new ImageIcon("wind.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);

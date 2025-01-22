@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa abstrakcyjna Source, po której dziedziczą klasy
+ * Coal, Wind, Sun, Atom, Water, Geothermal, Trash, Mountain, Forest, Lake
+ **/
 abstract class Source {
     protected long cost;
     protected int energyGenerated;
@@ -8,6 +12,9 @@ abstract class Source {
     protected JLabel label;
     protected ImageIcon image;
 
+    /**
+     * metoda przypisująca polom odpowiednie wartości
+     **/
     public Source(String name, long cost, int energyGenerated, ImageIcon image, String labelText) {
         this.cost = cost;
         this.energyGenerated = energyGenerated;
@@ -27,21 +34,26 @@ abstract class Source {
         return label;
     }
 
-    public ImageIcon getImage() {return image;}
+    public ImageIcon getImage() {
+        return image;
+    }
 
+    /**
+     * główna metoda wykorzystywana w odniesieniu do każdej z dziedziczących klas
+     */
     public void performAction() {
         if (Data.money >= cost) {
             Data.money -= cost;
             Data.energy += energyGenerated;
             Data.counter++;
-            if(button.getName() == "Elektrownia węglowa"){
-                Coal.how_many+=1;
+            if (button.getName() == "Elektrownia węglowa") {
+                Coal.how_many += 1;
             }
-            if(button.getName() == "Energia z odpadów"){
-                Trash.how_many+=1;
+            if (button.getName() == "Energia z odpadów") {
+                Trash.how_many += 1;
             }
-            if(button.getName() == "Las"){
-                Forest.how_many+=1;
+            if (button.getName() == "Las") {
+                Forest.how_many += 1;
             }
             System.out.println("Zakupiono: " + button.getName());
         } else {

@@ -6,17 +6,22 @@ import java.awt.event.MouseEvent;
 
 public class Menu {
 
-    //zmienne do obu metod
+    /**
+     * zmienne dotyczące obu metod
+     */
     static boolean read = false;
     static int page = 0;
     JLabel instructionsText;
     JPanel instructions;
 
+    /**
+     * funkcja wyświetlania menu po uruchomieniu gry
+     **/
     public void wyswietlV1() {
         MenuFrame m = new MenuFrame("Menu");
         m.setLayout(new BorderLayout());
 
-        // Panel z tłem
+        /** panel z tłem*/
         instructions = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -34,7 +39,7 @@ public class Menu {
 
         instructions.setLayout(new BorderLayout());
 
-        //tekst w menu
+        /** dodawanie tekstu w menu*/
         instructionsText = new JLabel();
         instructionsText.setFont(new Font("Parkinsans", Font.BOLD, 20));
         instructionsText.setOpaque(false);
@@ -46,7 +51,7 @@ public class Menu {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttons.setBackground(new Color(200, 220, 200));
 
-        //przycisk do przewijania stron
+        /** przycisk do przewijania stron*/
         JButton dalej = new JButton("Dalej");
         dalej.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -61,7 +66,7 @@ public class Menu {
             }
         });
 
-        //przejście do gry
+        /** przycisk umożliwiający zamknięcie menu i przejście do gry */
         JButton close = new JButton("Zamknij menu");
         close.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -80,12 +85,14 @@ public class Menu {
         m.setVisible(true);
     }
 
-    //menu wyswietlane w trakcje gry
+    /**
+     * metoda wyswietlania menu w trakcje gry
+     */
     public void wyswietlV2() {
         MenuFrame m2 = new MenuFrame("Menu");
         m2.setLayout(new BorderLayout());
 
-        // Panel z tłem
+        /** Panel z tłem*/
         instructions = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -108,7 +115,7 @@ public class Menu {
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1));
         buttonPanel.setBackground(new Color(200, 220, 200));
 
-        //przyciski do przechodzenia między stronami menu
+        /** przyciski do przechodzenia między stronami menu */
         JButton page1 = new JButton("Panel zakupów");
         JButton page2 = new JButton("Mapa");
         JButton page3 = new JButton("Następny etap");
@@ -143,6 +150,7 @@ public class Menu {
         buttonPanel.add(page3);
         buttonPanel.add(page4);
 
+        /** przycisk do zamknięcia menu **/
         JButton close = new JButton("Zamknij menu");
         close.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -162,7 +170,9 @@ public class Menu {
         m2.setVisible(true);
     }
 
-    //tekst w zależności od strony
+    /**
+     * ustawianie tekstu w zależności od strony, na której się znajdujemy
+     */
     private void updateInstructionsText() {
         switch (page) {
             case 0:
@@ -185,10 +195,17 @@ public class Menu {
         }
     }
 
+    /**
+     * wywołanie metody po uruchomieniu gry
+     **/
     public static void main(String[] args) {
         new Menu().wyswietlV2();
     }
 }
+
+/**
+ * klasa wykorzystana do stworzenia okna menu
+ **/
 
 class MenuFrame extends JFrame {
     MenuFrame(String nazwa) {

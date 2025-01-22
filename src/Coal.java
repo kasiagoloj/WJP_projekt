@@ -1,9 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Coal dziedzicząca po Source
+ */
 public class Coal extends Source {
     public static int how_many;
 
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public Coal() {
         ImageIcon image = new ImageIcon("coal.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
@@ -18,6 +24,9 @@ public class Coal extends Source {
         );
     }
 
+    /**
+     * metoda charakterystyczna dla Coal, odpowiada za dodanie obiektu jako warunku początkowego
+     */
     public void performWithoutCost(JPanel map, JLabel energy_label, JLabel pollution_label) {
         Data.energy += energyGenerated;
         Coal.how_many += 1;

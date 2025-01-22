@@ -1,7 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * klasa Trash dziedzicząca po Source
+ */
 public class Trash extends Source {
+
+    /**
+     * główna metoda wywoływana przy dodaniu obiektu
+     */
     public static int how_many;
 
     public Trash() {
