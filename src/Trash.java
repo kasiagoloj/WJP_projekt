@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Trash extends Source {
+    public static int how_many;
 
     public Trash() {
         ImageIcon image = new ImageIcon("trash.png");
@@ -13,7 +14,7 @@ public class Trash extends Source {
                 150_000_000L,
                 60,
                 image,
-                "<html><b>Energia z odpadów</b> <br> Cena: 150 mln zł <br> Energia: 60 GWh/miesiąc<br>Zmniejsza emisję zanieczyszczeń o 4%</html>"
+                "<html><b>Energia z odpadów</b> <br> Cena: 150 mln zł <br> Energia: 60 GWh/miesiąc<br>Zmniejsza emisję zanieczyszczeń o 3%</html>"
         );
     }
 }

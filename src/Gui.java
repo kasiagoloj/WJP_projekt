@@ -10,20 +10,22 @@ public class Gui {
     private JPanel map;
     private JPanel bottom;
     private JPanel state;
+    private JPanel buy;
 
     private JLabel money_label;
     private JLabel energy_label;
     private JLabel pollution_label;
+    private JLabel points_label;
 
     public void start() {
         Okno o = new Okno("SPARK");
 
         //podział na panele
         state = new JPanel();
-        state.setLayout(new GridLayout(2, 2));
+        state.setLayout(new GridLayout(2, 3));
         state.setBackground(new Color(37, 113, 160));
 
-        JPanel buy = new JPanel();
+        buy = new JPanel();
         buy.setBackground(new Color(37, 113, 160));
 
         map = new JPanel();
@@ -68,65 +70,61 @@ public class Gui {
 
                 @Override
                 public void drop(DropTargetDropEvent dtde) {
-                    System.out.println("Drop is ok");
                     try {
                         dtde.acceptDrop(DnDConstants.ACTION_MOVE);
                         Transferable transferable = dtde.getTransferable();
 
                         if (transferable.isDataFlavorSupported(TransferableIcon.ICON_FLAVOR)) {
-                            System.out.println("first if?");
                             Icon icon = (Icon) transferable.getTransferData(TransferableIcon.ICON_FLAVOR);
                             Source source = (Source) transferable.getTransferData(TransferableIcon.SOURCE_FLAVOR);
 
                             if (icon != null && source != null) {
-                                System.out.println("Icon and Source are valid.");
-                                if (Data.money >= source.cost && Data.counter <= 25) {
-                                    System.out.println("next if");
-                                    source.performAction();
-                                    Data.counter++;
-                                    Data.money -= source.cost;
-                                    Data.energy += source.energyGenerated;
-                                    updateMoneyLabel(money_label);
-                                    updateEnergyLabel(energy_label);
+                                JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
 
-                                    JLabel imageLabel = new JLabel(icon);
-                                    System.out.println("Icon added to cell.");
-
-                                    DragSource ds2 = DragSource.getDefaultDragSource();
-                                    ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
-                                        Transferable transferableIcon = new TransferableIcon(imageLabel.getIcon(), source);
-                                        DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferableIcon, null);
-                                    });
-
-                                    JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
-                                    if (targetCell.getComponentCount() == 0) {
-                                        targetCell.add(imageLabel);
-                                        addChanges(targetCell, source, imageLabel, money_label, energy_label);
-                                        targetCell.revalidate();
-                                        targetCell.repaint();
-                                    }
-                                } else if (Data.counter == 25) {
-                                    JOptionPane.showMessageDialog(null, "Brakuje miejsca, aby dodać: " + source.button.getName());
+                                if (source instanceof Water && !hasAdjacentLake(targetCell)) {
+                                    JOptionPane.showMessageDialog(null, "Elektrownia wodna musi być umieszczona obok jeziora");
                                 } else {
-                                    JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby zakupić: " + source.button.getName());
+
+                                    if (Data.money >= source.cost && Data.counter < 25) {
+                                        source.performAction();
+                                        updateMoneyLabel(money_label);
+                                        updateEnergyLabel(energy_label);
+
+                                        JLabel imageLabel = new JLabel(icon);
+
+                                        DragSource ds2 = DragSource.getDefaultDragSource();
+                                        ds2.createDefaultDragGestureRecognizer(imageLabel, DnDConstants.ACTION_MOVE, event -> {
+                                            Transferable transferableIcon = new TransferableIcon(imageLabel.getIcon(), source);
+                                            DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferableIcon, null);
+                                        });
+
+                                        // JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
+                                        if (targetCell.getComponentCount() == 0) {
+                                            targetCell.add(imageLabel);
+                                            targetCell.putClientProperty("source", source);
+                                            addChanges(targetCell, source, imageLabel, money_label, energy_label);
+                                            targetCell.revalidate();
+                                            targetCell.repaint();
+                                        }
+                                    } else if (Data.counter == 25) {
+                                        JOptionPane.showMessageDialog(null, "Brakuje miejsca, aby dodać: " + source.button.getName());
+                                    } else {
+                                        JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby zakupić: " + source.button.getName());
+                                    }
+                                    pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
+                                    map.revalidate();
+                                    map.repaint();
                                 }
-                                pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
-                                map.revalidate();
-                                map.repaint();
-                            } else {
-                                System.out.println("Icon or Source is null");
                             }
-                        } else {
-                            System.out.println("ICON_FLAVOR not supported");
+                            {
+                            }
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        System.out.println("błąd w drop");
                     }
                 }
 
             });
-
             map.add(cell);
         }
 
@@ -146,6 +144,9 @@ public class Gui {
         energy_label = new JLabel("| Generowana energia: " + Data.energy + " GWh/miesiąc ");
         energy_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
+        points_label = new JLabel("| Punkty: " + Data.points);
+        points_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
+
         pollution_label = new JLabel("| Zanieczyszczenie: " + Data.pollution + "%");
         pollution_label.setFont(new Font("Parkinsans", Font.BOLD, 20));
 
@@ -154,59 +155,14 @@ public class Gui {
 
         state.add(money_label);
         state.add(pollution_label);
+        state.add(points_label);
         state.add(energy_label);
         state.add(current_label);
+        buy.setLayout(new GridLayout(5, 2));
 
         updateMoneyLabel(money_label);
-
-        buy.setLayout(new GridLayout(8, 2));
-
-        Source[] sources;
-
-        if (Data.current_level <= 6) {
-            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom()};
-        } else if (Data.current_level <= 8) {
-            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal()};
-        } else if (Data.current_level <= 10) {
-            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash()};
-        } else {
-            sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water()};
-        }
-
-        //kupowanie
-        for (Source source : sources) {
-            JButton button = source.getButton();
-            JLabel label = source.getLabel();
-
-            button.setBackground(new Color(57, 133, 180));
-            button.setOpaque(true);
-            button.setBorderPainted(false);
-            button.setFocusPainted(false);
-
-            DragSource ds = DragSource.getDefaultDragSource();
-            ds.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE, event -> {
-                Transferable transferable = new TransferableIcon(source.getImage(), source);
-                DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
-            });
-
-            button.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(java.awt.event.MouseEvent e) {
-                    button.setBackground(new Color(77, 153, 200));
-                }
-
-                @Override
-                public void mouseExited(java.awt.event.MouseEvent e) {
-                    button.setBackground(new Color(57, 133, 180));
-                }
-            });
-
-            buy.add(button);
-            buy.add(label);
-            source.getButton().addActionListener(e -> {
-
-            });
-        }
+        Source[] sources = new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water(), new Lake(), new Mountain(), new Forest()};
+        addingSources(buy, sources);
 
         Coal coalBegin = new Coal();
         coalBegin.performWithoutCost(map, energy_label, pollution_label);
@@ -217,6 +173,7 @@ public class Gui {
         next.addActionListener(e -> {
             next_level();
             updateMoneyLabel(money_label);
+            updatePointsLabel(points_label);
             pollution_label.setText("|  Zanieczyszczenie: " + Data.pollution + "%");
             current_label.setText("| Etap: " + Data.current_level);
 
@@ -236,7 +193,7 @@ public class Gui {
 
 
         o.setVisible(true);
-    }//koniec start()
+    }//koniec start(), dalej metody
 
 
     //updade labeli money i energy
@@ -260,18 +217,83 @@ public class Gui {
         pollution_label.setText("| Zanieczyszczenie: " + Data.pollution + "%");
     }
 
+    private void updatePointsLabel(JLabel energy_label) {
+        points_label.setText("| Punkty: " + Data.points);
+    }
+
+    private boolean hasAdjacentLake(JPanel targetCell) {
+        int cellIndex = map.getComponentZOrder(targetCell);
+        int gridSize = 5;
+        int row = cellIndex / gridSize;
+        int col = cellIndex % gridSize;
+
+        int[] rowOffsets = {-1, 0, 1, 0};
+        int[] colOffsets = {0, -1, 0, 1};
+
+        for (int i = 0; i < rowOffsets.length; i++) {
+            int neighborRow = row + rowOffsets[i];
+            int neighborCol = col + colOffsets[i];
+
+            if (neighborRow >= 0 && neighborRow < gridSize && neighborCol >= 0 && neighborCol < gridSize) {
+                int neighborIndex = neighborRow * gridSize + neighborCol;
+                JPanel neighborCell = (JPanel) map.getComponent(neighborIndex);
+
+                if (neighborCell.getComponentCount() > 0) {
+                    Source neighborSource = (Source) neighborCell.getClientProperty("source");
+                    if (neighborSource instanceof Lake) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasAdjacentMountain(JPanel targetCell) {
+        int cellIndex = map.getComponentZOrder(targetCell);
+        int gridSize = 5;
+        int row = cellIndex / gridSize;
+        int col = cellIndex % gridSize;
+
+        int[] rowOffsets = {-1, 0, 1, 0};
+        int[] colOffsets = {0, -1, 0, 1};
+
+        for (int i = 0; i < rowOffsets.length; i++) {
+            int neighborRow = row + rowOffsets[i];
+            int neighborCol = col + rowOffsets[i];
+
+            if (neighborRow >= 0 && neighborRow < gridSize && neighborCol >= 0 && neighborCol < gridSize) {
+                int neighborIndex = neighborRow * gridSize + neighborCol;
+                JPanel neighborCell = (JPanel) map.getComponent(neighborIndex);
+
+                if (neighborCell.getComponentCount() > 0) {
+                    Source neighborSource = (Source) neighborCell.getClientProperty("source");
+
+                    if (neighborSource instanceof Mountain) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+
     //popup menu po najechaniu na pole i operacje
     private void addChanges(JPanel cell, Source source, JLabel imageLabel, JLabel money_label, JLabel energy_label) {
 
-        int cellIndex = map.getComponentZOrder(cell);
-
         JPopupMenu popup = new JPopupMenu();
         JMenuItem remove = new JMenuItem("Usuń");
+        boolean isUpgraded = Boolean.TRUE.equals(cell.getClientProperty("isUpgraded"));
 
-        if ((source instanceof Sun || source instanceof Wind)) {
-            boolean isUpgraded = Boolean.TRUE.equals(cell.getClientProperty("isUpgraded"));
-            //jeśli jeszcze nie zostało ulepszone
-            if (!isUpgraded) {
+        if (source instanceof Wind) {
+            if (hasAdjacentMountain(cell)) {
+                int energyBoost = source.energyGenerated;
+                Data.energy += energyBoost;
+                cell.putClientProperty("isUpgraded", true);
+                updateEnergyLabel(energy_label);
+            } else {
                 JMenuItem upgrade = new JMenuItem("Podwój wydajność");
                 upgrade.addActionListener(e -> {
                     if (Data.money >= source.cost / 3) {
@@ -280,7 +302,6 @@ public class Gui {
                         updateMoneyLabel(money_label);
                         updateEnergyLabel(energy_label);
 
-                        //oznaczenie jako ulepszona
                         cell.putClientProperty("isUpgraded", true);
                         popup.remove(upgrade);
                     } else {
@@ -291,6 +312,28 @@ public class Gui {
             }
         }
 
+        if (source instanceof Sun && !isUpgraded) {
+            JMenuItem upgrade = new JMenuItem("Podwój wydajność");
+            upgrade.addActionListener(e -> {
+                if (Data.money >= source.cost / 3) {
+                    Data.money -= source.cost / 3;
+                    Data.energy += 20;
+                    updateMoneyLabel(money_label);
+                    updateEnergyLabel(energy_label);
+
+                    //oznaczenie jako ulepszona
+                    cell.putClientProperty("isUpgraded", true);
+                    popup.remove(upgrade);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Nie masz wystarczających środków, aby ulepszyć: " + source.button.getName());
+                }
+            });
+            popup.add(upgrade);
+        }
+
+        if (source instanceof Mountain) {
+            checkAndUpgradeAdjacentWindFarms(cell, energy_label);
+        }
 
         remove.addActionListener(e -> {
             if (Data.money >= source.cost / 2) {
@@ -319,46 +362,92 @@ public class Gui {
                 popup.show(imageLabel, imageLabel.getWidth() / 2, imageLabel.getHeight() / 2);
             }
         });
-
         cell.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 popup.setVisible(false);
             }
         });
-
         popup.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 popup.setVisible(false);
             }
         });
-
-
     }
+
+    private void checkAndUpgradeAdjacentWindFarms(JPanel mountainCell, JLabel energy_label) {
+        int cellIndex = map.getComponentZOrder(mountainCell);
+        int gridSize = 5;
+        int row = cellIndex / gridSize;
+        int col = cellIndex % gridSize;
+
+        int[] rowOffsets = {-1, 0, 1, 0};
+        int[] colOffsets = {0, -1, 0, 1};
+
+        for (int i = 0; i < rowOffsets.length; i++) {
+            int neighborRow = row + rowOffsets[i];
+            int neighborCol = col + colOffsets[i];
+
+            if (neighborRow >= 0 && neighborRow < gridSize && neighborCol >= 0 && neighborCol < gridSize) {
+                int neighborIndex = neighborRow * gridSize + neighborCol;
+                JPanel neighborCell = (JPanel) map.getComponent(neighborIndex);
+
+                if (neighborCell.getComponentCount() > 0) {
+                    Source neighborSource = (Source) neighborCell.getClientProperty("source");
+
+                    if (neighborSource instanceof Wind && !Boolean.TRUE.equals(neighborCell.getClientProperty("isUpgraded"))) {
+                        int energyBoost = neighborSource.energyGenerated;
+
+                        Data.energy += energyBoost;
+
+                        neighborCell.putClientProperty("isUpgraded", true);
+                        updateEnergyLabel(energy_label);
+
+                        JOptionPane.showMessageDialog(null, "Farma wiatrowa w sąsiedztwie góry została ulepszona!");
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     //button 'next level'
     private void next_level() {
         Data.money += 576_000 * Data.energy;
-        Data.pollution += 5 * Coal.how_many;
+        Data.pollution = Math.max(0, Data.pollution + 5 * Coal.how_many - 3 * Trash.how_many - Forest.how_many);
         Data.current_level++;
+        Data.points++;
+
+        for (Component component : bottom.getComponents()) {
+            if (component instanceof JButton && ((JButton) component).getText().equals("Napraw atmosferę")) {
+                bottom.remove(component);
+                bottom.revalidate();
+                bottom.repaint();
+            }
+        }
         if (Data.current_level % 5 == 0) {
-            JButton fix = new JButton("Napraw atmosferę");
+            JButton fix = new JButton("Napraw atmosferę (Koszt = 500 mln)");
             fix.setFont(new Font("Parkinsans", Font.BOLD, 20));
             fix.addActionListener(e -> {
                 fix_void();
-                fix.hide();
+                bottom.remove(fix);
+                bottom.revalidate();
+                bottom.repaint();
             });
             bottom.add(fix);
             bottom.revalidate();
             bottom.repaint();
         }
+        addingSources(buy, new Source[]{new Coal(), new Wind(), new Sun(), new Atom(), new Geothermal(), new Trash(), new Water(), new Lake(), new Mountain(), new Forest()});
     }
 
     private void fix_void() {
         if (Data.money >= 500_000_000) {
             Data.money -= 500_000_000;
-            Data.pollution -= 5;
+            Data.pollution = Math.max(0, Data.pollution - 5);
             updateMoneyLabel(money_label);
             updatePollutionLabel(pollution_label);
             state.revalidate();
@@ -366,14 +455,61 @@ public class Gui {
         } else {
             JOptionPane.showMessageDialog(null, "Brak wystarczających środków.");
         }
-
     }
+
+    private void addingSources(JPanel buy, Source[] sources) {
+        buy.removeAll();
+        for (Source source : sources) {
+            JButton button = source.getButton();
+            JLabel label = source.getLabel();
+
+            button.setBackground(new Color(57, 133, 180));
+            button.setOpaque(true);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+
+            DragSource ds = DragSource.getDefaultDragSource();
+            ds.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE, event -> {
+                Transferable transferable = new TransferableIcon(source.getImage(), source);
+                DragSource.getDefaultDragSource().startDrag(event, DragSource.DefaultMoveDrop, transferable, null);
+            });
+
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    button.setBackground(new Color(77, 153, 200));
+                }
+
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    button.setBackground(new Color(57, 133, 180));
+                }
+            });
+
+            JPanel pairPanel = new JPanel();
+            pairPanel.setLayout(new GridLayout(2, 1));
+            pairPanel.setOpaque(false);
+            pairPanel.add(button);
+            pairPanel.add(label);
+
+            if ((source instanceof Geothermal && Data.current_level >= 6) ||
+                    (source instanceof Trash && Data.current_level >= 8) ||
+                    (source instanceof Water && Data.current_level >= 10) ||
+                    (source instanceof Coal || source instanceof Wind || source instanceof Sun || source instanceof Atom || source instanceof Lake || source instanceof Mountain || source instanceof Forest)) {
+                pairPanel.setVisible(true);
+            } else {
+                pairPanel.setVisible(false);
+            }
+            buy.add(pairPanel);
+        }
+    }
+
 
     class Okno extends JFrame {
         Okno(String nazwa) {
             super(nazwa);
             setResizable(true);
-            setSize(1000, 800);
+            setSize(1200, 800);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLayout(new BorderLayout());
         }

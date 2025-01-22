@@ -33,8 +33,15 @@ abstract class Source {
         if (Data.money >= cost) {
             Data.money -= cost;
             Data.energy += energyGenerated;
+            Data.counter++;
             if(button.getName() == "Elektrownia węglowa"){
                 Coal.how_many+=1;
+            }
+            if(button.getName() == "Energia z odpadów"){
+                Trash.how_many+=1;
+            }
+            if(button.getName() == "Las"){
+                Forest.how_many+=1;
             }
             System.out.println("Zakupiono: " + button.getName());
         } else {

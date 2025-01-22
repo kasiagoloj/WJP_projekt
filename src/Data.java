@@ -8,4 +8,5 @@ public class Data {
     public static int pollution = 0;
     public static int current_level = 0;
     public static int counter = 1;
+    public static int points = 1;
 }
