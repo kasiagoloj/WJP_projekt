@@ -11,7 +11,7 @@ public class Forest extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Forest() {
-        ImageIcon image = new ImageIcon("forest.png");
+        ImageIcon image = new ImageIcon("res/forest.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
         super(

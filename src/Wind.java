@@ -10,7 +10,7 @@ public class Wind extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Wind() {
-        ImageIcon image = new ImageIcon("wind.png");
+        ImageIcon image = new ImageIcon("res/wind.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

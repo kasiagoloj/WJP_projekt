@@ -10,7 +10,7 @@ public class Geothermal extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Geothermal() {
-        ImageIcon image = new ImageIcon("geothermal.png");
+        ImageIcon image = new ImageIcon("res/geothermal.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

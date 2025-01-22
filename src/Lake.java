@@ -10,7 +10,7 @@ public class Lake extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Lake() {
-        ImageIcon image = new ImageIcon("lake.png");
+        ImageIcon image = new ImageIcon("res/lake.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

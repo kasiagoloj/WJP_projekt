@@ -10,7 +10,7 @@ public class Atom extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Atom() {
-        ImageIcon image = new ImageIcon("atom.png");
+        ImageIcon image = new ImageIcon("res/atom.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

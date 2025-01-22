@@ -11,7 +11,7 @@ public class Coal extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Coal() {
-        ImageIcon image = new ImageIcon("coal.png");
+        ImageIcon image = new ImageIcon("res/coal.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

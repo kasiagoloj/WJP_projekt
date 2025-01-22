@@ -10,7 +10,7 @@ public class Water extends Source {
      * główna metoda wywoływana przy dodaniu obiektu
      */
     public Water() {
-        ImageIcon image = new ImageIcon("water.png");
+        ImageIcon image = new ImageIcon("res/water.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

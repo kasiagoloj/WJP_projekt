@@ -12,7 +12,7 @@ public class Trash extends Source {
     public static int how_many;
 
     public Trash() {
-        ImageIcon image = new ImageIcon("trash.png");
+        ImageIcon image = new ImageIcon("res/trash.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
 

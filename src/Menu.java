@@ -27,7 +27,7 @@ public class Menu {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
-                Image background = new ImageIcon("page" + page + ".jpeg").getImage();
+                Image background = new ImageIcon("page" + page + "res/.jpeg").getImage();
                 if (background != null) {
                     float alpha = 0.5f;
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
@@ -97,7 +97,7 @@ public class Menu {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Image background = new ImageIcon("page" + page + ".jpeg").getImage();
+                Image background = new ImageIcon("page" + page + ".res/jpeg").getImage();
                 g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
             }
         };

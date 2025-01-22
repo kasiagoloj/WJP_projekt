@@ -6,7 +6,7 @@ public class Mountain extends Source {
 
     /** główna metoda wywoływana przy dodaniu obiektu */
     public Mountain() {
-        ImageIcon image = new ImageIcon("mountain.png");
+        ImageIcon image = new ImageIcon("res/mountain.png");
         Image resizedImage = image.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         image = new ImageIcon(resizedImage);
         super(
