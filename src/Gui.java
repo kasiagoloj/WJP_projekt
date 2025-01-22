@@ -80,16 +80,20 @@ public class Gui {
 
                             if (icon != null && source != null) {
                                 JPanel targetCell = (JPanel) dtde.getDropTargetContext().getComponent();
+                                boolean isSpecial = source instanceof Lake || source instanceof Mountain || source instanceof Forest;
 
                                 if (source instanceof Water && !hasAdjacentLake(targetCell)) {
                                     JOptionPane.showMessageDialog(null, "Elektrownia wodna musi być umieszczona obok jeziora");
                                 } else {
-
-                                    if (Data.money >= source.cost && Data.counter < 25) {
+                                    if ((isSpecial && Data.points >= source.cost) || (!isSpecial && Data.money >= source.cost && Data.counter < 25)) {
                                         source.performAction();
-                                        updateMoneyLabel(money_label);
-                                        updateEnergyLabel(energy_label);
-
+                                        if(isSpecial){
+                                            Data.points -= source.cost;
+                                            updatePointsLabel(points_label);
+                                        } else {
+                                            updateMoneyLabel(money_label);
+                                            updateEnergyLabel(energy_label);
+                                        }
                                         JLabel imageLabel = new JLabel(icon);
 
                                         DragSource ds2 = DragSource.getDefaultDragSource();
@@ -420,9 +424,17 @@ public class Gui {
         Data.pollution = Math.max(0, Data.pollution + 5 * Coal.how_many - 3 * Trash.how_many - Forest.how_many);
         Data.current_level++;
         Data.points++;
+        if (Data.pollution>=100){
+            JOptionPane.showMessageDialog(null,"Zanieczyszczenie przekroczyło 100 %. Przegrałeś");
+            Window[] windows = Window.getWindows();
+            for (Window window : windows) {
+                window.setEnabled(false);
+            }
+            return;
+        }
 
         for (Component component : bottom.getComponents()) {
-            if (component instanceof JButton && ((JButton) component).getText().equals("Napraw atmosferę")) {
+            if (component instanceof JButton && ((JButton) component).getText().equals("Napraw atmosferę (Koszt = 500 mln)")) {
                 bottom.remove(component);
                 bottom.revalidate();
                 bottom.repaint();
