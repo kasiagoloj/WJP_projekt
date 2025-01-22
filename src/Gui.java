@@ -429,6 +429,7 @@ public class Gui {
         Data.pollution = Math.max(0, Data.pollution + 5 * Coal.how_many - 3 * Trash.how_many - Forest.how_many);
         Data.current_level++;
         Data.points++;
+        //czy przegrana
         if (Data.pollution >= 100) {
             JOptionPane.showMessageDialog(null, "Zanieczyszczenie przekroczyło 100 %. Przegrałeś");
             Window[] windows = Window.getWindows();
@@ -437,7 +438,10 @@ public class Gui {
             }
             return;
         }
-
+        //czy wygrana
+        if (Data.energy>=10000) {
+            JOptionPane.showMessageDialog(null, "Wygrałeś! Jednak jeśli chcesz, możesz kontynuować grę.");
+        }
         for (Component component : bottom.getComponents()) {
             if (component instanceof JButton && ((JButton) component).getText().equals("Napraw atmosferę (Koszt = 500 mln)")) {
                 bottom.remove(component);

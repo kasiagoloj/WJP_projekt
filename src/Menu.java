@@ -167,7 +167,7 @@ public class Menu {
         switch (page) {
             case 0:
                 instructionsText.setText("<html><div style='text-align: center;'>Witaj w grze SPARK - <br>Simulator for Planning and Allocating Renewable Kilowatts!<br><br>" +
-                        "Twoim celem jest osiągnięcie energetycznej niezależności.<br>Poprzez zarządzanie źródłami energii na mapie<br><br>" +
+                        "Twoim celem jest osiągnięcie energetycznej niezależności.<br>Poprzez zarządzanie źródłami energii na mapie.<br>Wytwarzaj 10000 GWh/miesiąc, aby wygrać<br><br>" +
                         "Przejdź dalej, aby poznać zasady gry.</div></html>");
                 break;
             case 1:
